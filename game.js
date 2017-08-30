@@ -433,7 +433,12 @@ function getRandomInt(min, max) {
 function turn(vehicles, peoples, buildings) {
     const buildingCount = buildings.length;
     let vec = vehicles[0];
-    
+    let state = {
+        demand: 'x',
+        location: 'y',
+        distFromLocs: 'z',
+        passengers: 'z1'
+    };
     for (i = 0; i < vehicles.length; i++) {
         let buildingSelection = getRandomInt(0, buildingCount);
         let vec = vehicles[i];
