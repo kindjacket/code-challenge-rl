@@ -427,80 +427,109 @@ function getState(vehicles, peoples, buildings) {
 }
 
 function getActionSpace(vehicle, peoples, buildings){
-    // assume going off the map is never beneficial
-    const mapMin = 1;
-    const mapMax = 24;
-    let actionSpace = new Set(['moveUp','moveDown', 'moveLeft', 'moveRight', 'wait']);
+    // assumes you always want to be travelling to a building if you're not at a building
+    let actionSpace = new Set([]);
     const vecAtBuilding =  buildings.filter(building => (building.x === vehicle.x && building.y === vehicle.y));
-    // edge of board constraints
-    if (vehicle.x === mapMin) {actionSpace.delete('moveLeft')}
-    if (vehicle.x === mapMax) {actionSpace.delete('moveRight')}
-    if (vehicle.y === mapMin) {actionSpace.delete('moveUp')}
-    if (vehicle.y === mapMax) {actionSpace.delete('moveDown')}
     if (vecAtBuilding.length > 0){
         let buildingName = vecAtBuilding[0].name;
         let pickUpOptions = peoples.filter(person => person.origin === buildingName);
+        let buildingOptions = buildings.filter(building => building.name !== buildingName);
         Array.from(pickUpOptions).forEach((option) => {
+            // edge case - could we try and pick up someone who has already been picked up
             actionSpace.add(option.name)
         });
+        actionSpace.add('wait');
+        Array.from(buildingOptions).forEach((building) => {actionSpace.add(building.name)});
+    }
+    else {
+        if (vehicle.dest === undefined) {
+            Array.from(buildings).forEach((building) => {actionSpace.add(building.name)});
+        }
+        else {actionSpace.add(vehicle.dest)}
     }
     return actionSpace
 }
 
-function actOnActionSpace(action, vehicle){
-    if (action === 'moveUp'){vehicle.moveUp()}
-    if (action === 'moveDown'){vehicle.moveDown()}
-    if (action === 'moveLeft'){vehicle.moveLeft()}
-    if (action === 'moveRight'){vehicle.moveRight()}
+
+function actOnActionSpace(action, vehicle, buildings){
     if (action === 'wait'){}
-    else {vehicle.pick(action)}
+    else if (action.length > 1){vehicle.pick(action)}
+    else {
+        let selectedBuilding = buildings.filter(building => (building.name === action));
+        vehicle.moveTo(selectedBuilding[0]);
+        vehicle.dest = action
+    }
 }
+
 
 function turn(vehicles, peoples, buildings) {
     const state = getState(vehicles, peoples, buildings);
     const chosenVec = vehicles[0];
     let actionSpace = getActionSpace(chosenVec, peoples, buildings);
+    console.log(actionSpace);
     let selectedAction = getRandomItem(actionSpace);
-    actOnActionSpace(selectedAction, chosenVec);
-    console.log(chosenVec.x,chosenVec.y)
+    console.log(selectedAction);
+    actOnActionSpace(selectedAction, chosenVec, buildings);
 }
-//
-// function peopleAtBuilding() {
-//     peoples.map(person => person.origin)
-// }
-//
-// function moveVecToDest() {
-//
-// }
-//
-// function pickUp(vec) {
-//     let x = vec[1];
-//     let y = vec[2];
-//     if
+
+
+// very general actions space making a successful ride is very very unkikely in this version
+// function getActionSpace(vehicle, peoples, buildings){
+//     // assume going off the map is never beneficial
+//     const mapMin = 1;
+//     const mapMax = 24;
+//     let actionSpace = new Set(['moveUp','moveDown', 'moveLeft', 'moveRight', 'wait']);
+//     const vecAtBuilding =  buildings.filter(building => (building.x === vehicle.x && building.y === vehicle.y));
+//     // edge of board constraints
+//     if (vehicle.x === mapMin) {actionSpace.delete('moveLeft')}
+//     if (vehicle.x === mapMax) {actionSpace.delete('moveRight')}
+//     if (vehicle.y === mapMin) {actionSpace.delete('moveUp')}
+//     if (vehicle.y === mapMax) {actionSpace.delete('moveDown')}
+//     if (vecAtBuilding.length > 0){
+//         let buildingName = vecAtBuilding[0].name;
+//         let pickUpOptions = peoples.filter(person => person.origin === buildingName);
+//         Array.from(pickUpOptions).forEach((option) => {
+//             actionSpace.add(option.name)
+//         });
+//     }
+//     return actionSpace
 // }
 
-function turn(vehicles, peoples, buildings) {
-    console.log(peoples.filter(person => person.origin === 'A'));
-    const buildingCount = buildings.length;
-    let vec = vehicles[0];
+// // (all possible actions. Space could be too big for this??)
+// function actOnActionSpace(action, vehicle){
+//     if (action === 'moveUp'){vehicle.moveUp()}
+//     if (action === 'moveDown'){vehicle.moveDown()}
+//     if (action === 'moveLeft'){vehicle.moveLeft()}
+//     if (action === 'moveRight'){vehicle.moveRight()}
+//     if (action === 'wait'){}
+//     else {vehicle.pick(action)}
+// }
 
-    for (i = 0; i < vehicles.length; i++) {
-        let buildingSelection = getRandomInt(0, buildingCount);
-        let vec = vehicles[i];
-        if (!("desiredDestination" in vec)) {
-            vec.moveTo(buildings[buildingSelection]);
-            vec.desiredDestination = buildings[buildingSelection];
-        }
-        else if (vec.desiredDestination.x === vec.x
-            && vec.desiredDestination.y === vec.y) {
-            // console.log(peoples)
-            // who's at the destination??
-            // vec.pick(peoples[0])
-            // console.log(peoples.map(person => person.origin))
-            console.log(peoples.filter(person => person.origin === 'A')) // this tells us who is at building A
-        }
-        else {
-            vec.moveTo(vec.desiredDestination)
-        }
-    }
-}
+
+
+
+// function turn(vehicles, peoples, buildings) {
+//     console.log(peoples.filter(person => person.origin === 'A'));
+//     const buildingCount = buildings.length;
+//     let vec = vehicles[0];
+//
+//     for (i = 0; i < vehicles.length; i++) {
+//         let buildingSelection = getRandomInt(0, buildingCount);
+//         let vec = vehicles[i];
+//         if (!("desiredDestination" in vec)) {
+//             vec.moveTo(buildings[buildingSelection]);
+//             vec.desiredDestination = buildings[buildingSelection];
+//         }
+//         else if (vec.desiredDestination.x === vec.x
+//             && vec.desiredDestination.y === vec.y) {
+//             // console.log(peoples)
+//             // who's at the destination??
+//             // vec.pick(peoples[0])
+//             // console.log(peoples.map(person => person.origin))
+//             console.log(peoples.filter(person => person.origin === 'A')) // this tells us who is at building A
+//         }
+//         else {
+//             vec.moveTo(vec.desiredDestination)
+//         }
+//     }
+// }
