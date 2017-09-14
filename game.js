@@ -466,27 +466,38 @@ function createBuildingRadius(buildings){
     })
 }
 
-function getReward(vehicle, buildings){
-    // lets try when reached building first. This will probably fail.
-    const vecAtBuilding = buildings.filter(building => (building.x === vehicle.x && building.y === vehicle.y));
-    const customersCloseToDropOff = vehicle.peoples.filter(person => (person.destination === vecAtBuilding.name));
-    Array.from(customersCloseToDropOff).forEach((customer) => {
-        if (customer.time > 0) {return 50}
+function getReward(vehicle, buildings) {
+    // hard to get reward from vec, buildings and people. Need to look at when
+    const vecBuildingDest = buildings.filter(building => (building.name === vehicle.dest));
+    if (vecBuildingDest.length > 0) {
+        let inRadius = vecBuildingDest[0].radius.filter(location => (location.x === vehicle.x && location.y === vehicle.y));
+        if (inRadius.length > 0 && vehicle.peoples.length > 0) {
+            const customersCloseToDropOff = vehicle.peoples.filter(person => (person.destination === vehicle.dest));
+            let totalReward = 0;
+            Array.from(customersCloseToDropOff).forEach((customer) => {
+                if (customer.time > 0) {totalReward += 50}
+            });
+            return totalReward
+        }
         else {return 0}
-    });
+    }
+    else {return 0}
 }
 
 totalReward = 0;
-console.log(state);
 function turn(vehicles, peoples, buildings) {
     createBuildingRadius(buildings);
-    console.log(getReward());
     const chosenVec = vehicles[0];
+    const turnReward = getReward(chosenVec, buildings);
+    if (turnReward > 0) {
+        totalReward += turnReward
+        console.log(totalReward)
+    }
     const state = getState(vehicles, peoples, buildings);
     let actionSpace = getActionSpace(chosenVec, peoples, buildings);
-    console.log(actionSpace);
+//    console.log(actionSpace);
     let selectedAction = getRandomItem(actionSpace);
-    console.log(selectedAction);
+//    console.log(selectedAction);
     actOnActionSpace(selectedAction, chosenVec, buildings);
 }
 
