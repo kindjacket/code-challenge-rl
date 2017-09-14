@@ -410,12 +410,6 @@
 
 
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
-
 function getRandomItem(set) {
     let items = Array.from(set);
     return items[Math.floor(Math.random() * items.length)];
@@ -461,10 +455,34 @@ function actOnActionSpace(action, vehicle, buildings){
     }
 }
 
+function createBuildingRadius(buildings){
+    Array.from(buildings).forEach((building) => {
+        building.radius = [
+            {x:(building.x+1),y:building.y},
+            {x:(building.x-1),y:building.y},
+            {x:building.x,y:(building.y+1)},
+            {x:building.x,y:(building.y-1)}
+        ]
+    })
+}
 
+function getReward(vehicle, buildings){
+    // lets try when reached building first. This will probably fail.
+    const vecAtBuilding = buildings.filter(building => (building.x === vehicle.x && building.y === vehicle.y));
+    const customersCloseToDropOff = vehicle.peoples.filter(person => (person.destination === vecAtBuilding.name));
+    Array.from(customersCloseToDropOff).forEach((customer) => {
+        if (customer.time > 0) {return 50}
+        else {return 0}
+    });
+}
+
+totalReward = 0;
+console.log(state);
 function turn(vehicles, peoples, buildings) {
-    const state = getState(vehicles, peoples, buildings);
+    createBuildingRadius(buildings);
+    console.log(getReward());
     const chosenVec = vehicles[0];
+    const state = getState(vehicles, peoples, buildings);
     let actionSpace = getActionSpace(chosenVec, peoples, buildings);
     console.log(actionSpace);
     let selectedAction = getRandomItem(actionSpace);
