@@ -1,0 +1,54 @@
+<!doctype html> <html> <head> <meta charset="utf-8"> <title>Local Motion - code challenge</title> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="x-ua-compatible" content="ie=edge"> <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css"> <link href="/front/css/challenge/game.css" rel="stylesheet" type="text/css"> </head> <body> <section class="container" style="width:1232px"> <div class="card card-sm"> <div id="box"> <div class="chead text-center"><h2>Will your code save the day?</h2></div> <div class="cbody text-center"> <div style="width:400px;display:inline-block"><br> <p>All means of transportation broke loose and everybody has to walk from building to building.</p> <p>You control a fleet of five vehicles, your goal is to pick people up and bring them to their destination before they get bored of waiting. You earn $50 each time you make it happen.<br>You win the game if you can collect more than $10,000 in 1000 turns.</p><br><br><a class="btn btn-primary btn-lg btn-block" id="take_challenge">Take the challenge</a><br><br> </div> </div> </div> <canvas id="canvas" width="1200" height="640"></canvas> <div id="imgs" style="display:none"><img img-alias="vehicle" src="/front/img/game/car.png"><img img-alias="building" src="/front/img/game/building.png"><img img-alias="bul" src="/front/img/game/bul.png"><img img-alias="dollar" src="/front/img/game/money_dollar.png"><img img-alias="happy" src="/front/img/game/emotion_happy16.png"><img img-alias="unhappy" src="/front/img/game/emotion_unhappy16.png"><img img-alias="panel" src="/front/img/game/panel.png"><img img-alias="people0" src="/front/img/game/people0.png"><img img-alias="people1" src="/front/img/game/people1.png"><img img-alias="people2" src="/front/img/game/people2.png"><img img-alias="people3" src="/front/img/game/people3.png"><img img-alias="people4" src="/front/img/game/people4.png"><img img-alias="people5" src="/front/img/game/people5.png"><img img-alias="people6" src="/front/img/game/people6.png"><img img-alias="people7" src="/front/img/game/people7.png"><img img-alias="people8" src="/front/img/game/people8.png"><img img-alias="people9" src="/front/img/game/people9.png"><img img-alias="people10" src="/front/img/game/people10.png"><img img-alias="people11" src="/front/img/game/people11.png"><img img-alias="people12" src="/front/img/game/people12.png"><img img-alias="people13" src="/front/img/game/people13.png"><img img-alias="people14" src="/front/img/game/people14.png"><img img-alias="people15" src="/front/img/game/people15.png"><img img-alias="people16" src="/front/img/game/people16.png"><img img-alias="people17" src="/front/img/game/people17.png"><img img-alias="people18" src="/front/img/game/people18.png"><img img-alias="people19" src="/front/img/game/people19.png"><img img-alias="people20" src="/front/img/game/people20.png"><img img-alias="people21" src="/front/img/game/people21.png"><img img-alias="people22" src="/front/img/game/people22.png"><img img-alias="people23" src="/front/img/game/people23.png"><img img-alias="people24" src="/front/img/game/people24.png"><img img-alias="people25" src="/front/img/game/people25.png"><img img-alias="people26" src="/front/img/game/people26.png"><img img-alias="people27" src="/front/img/game/people27.png"><img img-alias="people28" src="/front/img/game/people28.png"><img img-alias="people29" src="/front/img/game/people29.png"><img img-alias="people30" src="/front/img/game/people30.png"><img img-alias="people31" src="/front/img/game/people31.png"></div> </div> </section> <section class="container container-small" id="win" style="display:none"> <div class="card card-sm"> <div class="chead text-center" id="win-title"><h2>Congratulations!</h2></div> <div class="cbody" id="win-body"> <div class="form-help-block">Submit your code now, a Local Motion engineer will be in touch</div> <div class="form-group"><label for="email">Email</label><input class="form-control input-lg" id="email" name="email" type="email"></input></div> <input class="btn btn-primary btn-lg btn-block" id="submit" type="submit" value="Submit code"></input></div> </div> </section> <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script> <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> <script src="/front/js/challenge/ace/ace.js"></script> <script src="/front/js/challenge/ace/mode-javascript.js"></script> <script src="/front/js/challenge/game.draw.js"></script> <script src="/front/js/challenge/game.js"></script> </body> </html> <script>
+    // "turn" is called at each turn of the game
+    // your goal is to move the vehicles in order to bring people to their destination
+    // you can only:
+    //  - move vehicles (up, down, left or right, not in diagonal)
+    //  - select which people you want to pick up
+    //
+    // a vehicle can pick-up / drop people only when it's on the same
+    // coordinates as the building of origin / destination
+    //
+    // Examples of moving a vehicle:
+    //  vehicles[0].moveUp();
+    //  vehicles[0].moveDown();
+    //  vehicles[0].moveLeft();
+    //  vehicles[0].moveRight();
+    //  and very handy:
+    //  vehicles[0].moveTo(buildings[0]); >> moves 1px toward the target
+    //
+    // Picking up someone:
+    //  You can ask a vehicle to pick someone by doing something like:
+    //   vehicles[0].pick(peoples[0]);
+    //  If the vehicle is on the same building as the people during that turn, it will pick him/her up
+    //  You can pick 4 peoples max in a vehicle
+    //  Note: the vehicle will pick people up before they can move
+    //
+    // Dropping someone:
+    //  Dropping off is automatic: whenever a vehicle contains someone that has
+    //  reached destination it drops him off.
+    //  This is when you earn $50
+    //
+    // Time:
+    //  each people has a people.time, which represent the time (in turns) left
+    //  to bring them to the correct destination.
+    //  If they feel they're late, they'll go by foot.
+    //  They go at a speed of 1px every 2 turns
+    //
+    //
+    // "turn" function's params :
+    //
+    // vehicles is an array of vehicle
+    //  vehicle.x/vehicle.y is the position of the vehicle
+    //  vehicle.peoples is an array of people in the vehicle (must be <=4)
+    //
+    // peoples is an array of people who are currently not in a vehicle
+    //  people.x/people.y is the position of the people
+    //  people.destination is a string representing the name of a building
+    //
+    // buildings are the buildings
+    //  building.x/building.y is the position of the building
+    //  building.name is the name of the building
+    //
+    // You can add your own parameters to each variable, they will be copied from turn to turn.
+
+</script>

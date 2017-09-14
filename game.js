@@ -408,15 +408,62 @@
 
 /////// Challenge Attempt ////////
 
+
+
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-// function getBuilding() {
-//
-// }
+function getRandomItem(set) {
+    let items = Array.from(set);
+    return items[Math.floor(Math.random() * items.length)];
+}
+
+
+function getState(vehicles, peoples, buildings) {
+    return {vehicles, peoples, buildings};
+}
+
+function getActionSpace(vehicle, peoples, buildings){
+    // assume going off the map is never beneficial
+    const mapMin = 1;
+    const mapMax = 24;
+    let actionSpace = new Set(['moveUp','moveDown', 'moveLeft', 'moveRight', 'wait']);
+    const vecAtBuilding =  buildings.filter(building => (building.x === vehicle.x && building.y === vehicle.y));
+    // edge of board constraints
+    if (vehicle.x === mapMin) {actionSpace.delete('moveLeft')}
+    if (vehicle.x === mapMax) {actionSpace.delete('moveRight')}
+    if (vehicle.y === mapMin) {actionSpace.delete('moveUp')}
+    if (vehicle.y === mapMax) {actionSpace.delete('moveDown')}
+    if (vecAtBuilding.length > 0){
+        let buildingName = vecAtBuilding[0].name;
+        let pickUpOptions = peoples.filter(person => person.origin === buildingName);
+        Array.from(pickUpOptions).forEach((option) => {
+            actionSpace.add(option.name)
+        });
+    }
+    return actionSpace
+}
+
+function actOnActionSpace(action, vehicle){
+    if (action === 'moveUp'){vehicle.moveUp()}
+    if (action === 'moveDown'){vehicle.moveDown()}
+    if (action === 'moveLeft'){vehicle.moveLeft()}
+    if (action === 'moveRight'){vehicle.moveRight()}
+    if (action === 'wait'){}
+    else {vehicle.pick(action)}
+}
+
+function turn(vehicles, peoples, buildings) {
+    const state = getState(vehicles, peoples, buildings);
+    const chosenVec = vehicles[0];
+    let actionSpace = getActionSpace(chosenVec, peoples, buildings);
+    let selectedAction = getRandomItem(actionSpace);
+    actOnActionSpace(selectedAction, chosenVec);
+    console.log(chosenVec.x,chosenVec.y)
+}
 //
 // function peopleAtBuilding() {
 //     peoples.map(person => person.origin)
@@ -426,19 +473,17 @@ function getRandomInt(min, max) {
 //
 // }
 //
-// function pickUp() {
-//
+// function pickUp(vec) {
+//     let x = vec[1];
+//     let y = vec[2];
+//     if
 // }
 
 function turn(vehicles, peoples, buildings) {
+    console.log(peoples.filter(person => person.origin === 'A'));
     const buildingCount = buildings.length;
     let vec = vehicles[0];
-    let state = {
-        demand: 'x',
-        location: 'y',
-        distFromLocs: 'z',
-        passengers: 'z1'
-    };
+
     for (i = 0; i < vehicles.length; i++) {
         let buildingSelection = getRandomInt(0, buildingCount);
         let vec = vehicles[i];
