@@ -5,6 +5,7 @@
 # 1. going direct to destination is optimal
 # 2. changing destination mid route is sub optimal
 # 3. picking a customer up takes a go. This needs to be tested
+# 4. assume it's never optimal to wait at the beginning
 
 ### action space
 
@@ -34,7 +35,7 @@ def get_action_space(state):
     vehicle_actions = {}
     ### starting actions
     if state.time == 0:
-        starting_actions = ['wait']
+        starting_actions = []
         for building in state.buildings:
             starting_actions.append(building.name)
         for vehicle in state.vehicles:
